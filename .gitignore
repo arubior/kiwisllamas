@@ -1,0 +1,6 @@
+*.swp
+dataset/*
+runs/*
+*.json
+*.pyc
+*.jpg

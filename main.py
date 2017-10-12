@@ -27,7 +27,7 @@ data_transforms = {
             Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ToCHW()
         ]),
-        'test': transforms.Compose([
+        'val': transforms.Compose([
             Rescale((224, 224)),
             Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ToCHW()
@@ -44,13 +44,13 @@ data_dir = 'dataset'
 image_datasets = {x: KiwisLlamasDataset('%s.txt' % x,
                                          data_dir,
                                          transform=data_transforms[x])
-                  for x in ['train', 'test']}
+                  for x in ['train', 'val']}
 
-dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'test']}
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x],
                             batch_size=4, shuffle=True, num_workers=1)
-                for x in ['train', 'test']}
+                for x in ['train', 'val']}
 
 class_names = {0: 'kiwi', 1: 'llama'}
 
@@ -58,7 +58,7 @@ use_gpu = torch.cuda.is_available()
 
 # Observe data:
 """
-for i_batch, sample_batched in enumerate(dataloaders['test']):
+for i_batch, sample_batched in enumerate(dataloaders['val']):
     print(i_batch, sample_batched['image'].size())
 
     # observe 4th batch and stop.
@@ -94,7 +94,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         print('-' * 10)
 
         # Each epoch has a training and validation phase
-        for phase in ['train', 'test']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 scheduler.step()
                 model.train(True)  # Set model to training mode
@@ -149,7 +149,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                  writer.add_histogram(name, param, epoch) 
 
             # deep copy the model
-            if phase == 'test' and epoch_acc > best_acc:
+            if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = model.state_dict()
 
@@ -176,7 +176,7 @@ def visualize_model(model, num_images=6):
     images_so_far = 0
     fig = plt.figure()
 
-    for i, data in enumerate(dataloaders['test']):
+    for i, data in enumerate(dataloaders['val']):
         inputs, labels = data['image'], data['tag']
         if use_gpu:
             inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
@@ -235,7 +235,7 @@ model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
 visualize_model(model_ft)
 
 # if you want to show the input tensor, set requires_grad=True
-data = next(iter(dataloaders['test']))
+data = next(iter(dataloaders['val']))
 res = model_ft(Variable(data['image']))
 writer.add_graph(model_ft, res)
 writer.export_scalars_to_json("./all_scalars.json")
