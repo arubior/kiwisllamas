@@ -28,4 +28,4 @@ ff.close()
 Run _main.py_ in python.
 
 ## 3. Visualize the results
-Run _tensorboard --logdir runs_ in a terminal and open in a browser the specified address.
+Run ```tensorboard --logdir runs``` in a terminal and open in a browser the specified address.
