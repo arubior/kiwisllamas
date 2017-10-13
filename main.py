@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 import torchvision
 from torchvision import datasets, models, transforms
 from datasets import KiwisLlamasDataset
-from utils import imshow, Rescale, RandomCrop, Normalize, RandomHorizontalFlip, ToCHW
+from utils import imshow
 from tensorboardX import SummaryWriter
 
 plt.ion() # interactive mode
@@ -21,18 +21,19 @@ writer = SummaryWriter()
 
 data_transforms = {
         'train': transforms.Compose([
-            Rescale((256, 256)),
-            RandomCrop((224, 224)),
-            RandomHorizontalFlip(),
-            Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            ToCHW()
+            transforms.ToPILImage(),
+            transforms.Resize([256, 256]),
+            transforms.RandomCrop((224, 224)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
         'val': transforms.Compose([
-            Rescale((224, 224)),
-            Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            ToCHW()
+            transforms.ToPILImage(),
+            transforms.Resize([224, 224]),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])}
-
 
 
 ########################################################
@@ -57,7 +58,6 @@ class_names = {0: 'kiwi', 1: 'llama'}
 use_gpu = torch.cuda.is_available()
 
 # Observe data:
-"""
 for i_batch, sample_batched in enumerate(dataloaders['val']):
     print(i_batch, sample_batched['image'].size())
 
@@ -67,7 +67,6 @@ for i_batch, sample_batched in enumerate(dataloaders['val']):
         imshow(out, title=[class_names[x] for x in sample_batched['tag']])
         plt.show()
 	break
-"""
 
 
 ######################################################################
